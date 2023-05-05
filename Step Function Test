@@ -1,0 +1,69 @@
+{
+  "Comment": "Testing Akka Agent management via Step Function Wait States",
+  "StartAt": "Bita's Lambda Test",
+  "States": {
+    "Bail": {
+      "Type": "Fail",
+      "Error": "QueueProc",
+      "Cause": "Processing Went South"
+    },
+    "Bita's Lambda Test": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "S3_read_test",
+        "Payload": {
+          "route": "blt",
+          "maxRecords": 100,
+          "status": "Queued",
+          "preview": false,
+          "input.$": "$"
+        }
+      },
+      "End": true,
+      "ResultPath": "$.Results",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.TooManyRequestsException",
+            "java.lang.NoClassDefFoundError",
+            "Runtime.ExitError",
+            "java.sql.SQLNonTransientConnectionException"
+          ],
+          "IntervalSeconds": 60,
+          "BackoffRate": 2,
+          "MaxAttempts": 4
+        },
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "com.amazonaws.SdkClientException",
+            "States.Timeout",
+            "Lambda.Unknown"
+          ],
+          "IntervalSeconds": 10,
+          "BackoffRate": 2,
+          "MaxAttempts": 4
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "Lambda.Unknown"
+          ],
+          "ResultPath": "$.Results",
+          "Next": "Bail"
+        },
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.Results",
+          "Next": "Bail"
+        }
+      ]
+    }
+  }
+}
