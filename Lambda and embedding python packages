@@ -1,0 +1,9 @@
+python3.9 -m venv "lambda_test”
+source lambda_test/bin/activate
+pip install \
+    --platform manylinux2014_x86_64 \
+    --target=lambda_test \
+    --implementation cp \
+    --python 3.9 \
+    --only-binary=:all: --upgrade \
+    pandas fsspec tox tox-conda openpyxl
