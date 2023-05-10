@@ -1,0 +1,32 @@
+
+{
+  "Comment": "A simple AWS Step Functions state machine that takes a csv file from S3 bucket pass it throgh a lambda function and turns it into a json file",
+  "StartAt": "InputType",
+  "States": {
+    "InputType": {
+        "Type" : "Choice",
+        "Choices": [ 
+          {
+            "Variable": "$.InputType",
+            "StringEquals": "Contacts",
+            "Next": "ConvertContacts"
+          },
+          {
+            "Variable": "$.InputType",
+            "StringEquals": "Assets",
+            "Next": "ConvertAssets"
+          }
+      ]
+    },
+     "ConvertContacts": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME",
+      "End": true
+    },
+    "ConvertAssets": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME",
+      "End": true
+    }
+  }
+}
