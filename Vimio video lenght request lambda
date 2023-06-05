@@ -1,0 +1,32 @@
+import requests
+
+def lambda_handler(event, context):
+    # Retrieve the video reference number from the event
+    reference_number = event['reference_number']
+    
+    # Make a GET request to the Vimeo API to fetch the video metadata
+    headers = {
+        'Authorization': 'Bearer YOUR_VIMEO_ACCESS_TOKEN',
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.vimeo.*+json;version=3.4'
+    }
+    url = f'https://api.vimeo.com/videos/{reference_number}'
+    response = requests.get(url, headers=headers)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Extract the video duration from the response JSON
+        video_data = response.json()
+        duration = video_data['duration']
+        
+        # Return the duration to the caller
+        return {
+            'statusCode': 200,
+            'duration': duration
+        }
+    else:
+        # Return an error message if the request failed
+        return {
+            'statusCode': response.status_code,
+            'errorMessage': response.text
+        }
